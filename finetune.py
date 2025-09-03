@@ -1,12 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Subset
-import numpy as np
-from pretrain import MLP, filter_dataset_by_labels, load_mnist_data
-
+from pretrain import MLP, load_mnist_data
+import config
 
 class LoRALinear(nn.Module):
     """LoRA adaptation for Linear layers"""
@@ -119,9 +115,14 @@ def finetune():
     pretrained_model.to(device)
     print("Loaded pretrained model from 'pretrained.pth'")
     
+    # Hyperparameters
+    lora_rank = config.lora_rank
+    lora_alpha = config.lora_alpha
+    batch_size = config.lora_batch_size
+    learning_rate = config.lora_learning_rate
+    num_epochs = config.lora_num_epochs
+    
     # Create LoRA model
-    lora_rank = 16
-    lora_alpha = 32
     lora_model = LoRAMLP(pretrained_model, rank=lora_rank, alpha=lora_alpha).to(device)
     print(f"Created LoRA model with rank={lora_rank}, alpha={lora_alpha}")
     
@@ -130,11 +131,6 @@ def finetune():
     trainable_params = sum(p.numel() for p in lora_model.parameters() if p.requires_grad)
     print(f"Total parameters: {total_params:,}")
     print(f"Trainable LoRA parameters: {trainable_params:,} ({100*trainable_params/total_params:.2f}%)")
-    
-    # Hyperparameters for fine-tuning
-    batch_size = 64
-    learning_rate = 0.001
-    num_epochs = 5
     
     # Define fine-tuning labels (8-9 only)
     finetune_labels = [8, 9]
@@ -154,7 +150,7 @@ def finetune():
         train_lora_model(lora_model, finetune_loader, criterion, optimizer, device)
     
     # Save LoRA model
-    lora_model_path = 'finetuned.pth'
+    lora_model_path = config.lora_model_path
     torch.save(lora_model.state_dict(), lora_model_path)
     print(f"\nLoRA model saved as '{lora_model_path}'")
     

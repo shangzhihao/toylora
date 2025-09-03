@@ -128,6 +128,8 @@ This toy example helps understand:
 - **Learning Rate**: 0.001 (Adam optimizer)
 - **Training**: 10 epochs base + 5 epochs LoRA
 
+Other hyperparameters are in config.py.
+
 ## 📚 Further Reading
 
 - [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)
