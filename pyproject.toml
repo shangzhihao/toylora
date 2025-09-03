@@ -1,14 +1,13 @@
 [project]
 name = "toylora"
 version = "0.1.0"
-description = "Add your description here"
+description = "a toy to show how lora works"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "torch>=2.8.0",
     "torchvision>=0.20.0",
     "numpy>=1.24.0",
-    "pillow>=10.0.0",
 ]
 
 [dependency-groups]
