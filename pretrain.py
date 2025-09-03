@@ -196,7 +196,7 @@ def pretrain():
         train_model(model, train_loader, criterion, optimizer, device)
     
     # Save the model
-    model_path = 'mnist_mlp_pretrained.pth'
+    model_path = 'pretrained.pth'
     torch.save(model.state_dict(), model_path)
     print(f"\nPretrained model saved as '{model_path}'")
     

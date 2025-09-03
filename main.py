@@ -5,7 +5,7 @@ from inference import inference
 
 jobs = {"pretrain", "finetune", "inference"}
 
-def main(job="finetune"):
+def main(job="pretrain"):
     if job not in jobs:
         raise ValueError(f"Invalid job name: {job}. Valid options are: {jobs}")
     if job == "pretrain":

@@ -45,34 +45,42 @@ For each Linear layer:
   Where: A ∈ ℝᵐˣʳ, B ∈ ℝʳˣⁿ, r << min(m,n)
 ```
 
+Lora is a quit easy theory. `W` is the parameter matrix of pretrained model and trained in the pretrain phase. In the finetune phase, we create a new model with parameters `W'=(W + A × B)`. `A` is initialized randomly and `B` is initialized as zeors, so `W'=W` when lora model is created. `A` and `B` are trainable matrices and `W` is frozen in the finetune phase. There are `mˣn` parameters to be finetuned without lora, and `mˣr+rˣn` parameters to be finetuned with lora. The total number of parameters is reduced, and the training time is reduced if `r` is small.
+
 ## 🚀 Quick Start
 
 ### Installation
 ```bash
 uv sync
 ```
-
-### Phase 1: Train Base Model (digits 0-7)
+### Pretrain Phase: Train Base Model (digits 0-7)
 ```bash
-python train.py
+python main.py --job=pretrain
+or
+python ptrain.py
 ```
 
 This creates:
-- `mnist_mlp_model_0to7.pth` - Base model weights
-- Training on 48,200 samples (digits 0-7 only)
-- ~98.7% accuracy on trained digits, 0% on digits 8-9
+- `pretrained.pth` - 567,434 trainable parameters
+- Training on digits 0-7 only
 
-### Phase 2: LoRA Fine-tuning (digits 8-9)
+### Finetune Phase: LoRA Fine-tuning (digits 8-9)
 ```bash
-# TODO: Implement LoRA fine-tuning script
-python lora_finetune.py
+python main.py --job=finetune
+or
+python finetune.py
 ```
+This creates:
+- `finetuned.pth` - 567,434 frozen parameters and 41,367 trainable parameters
+- Training on digits 8 and 9
 
 ### Testing and Inference
 ```bash
 # TODO: Implement inference script
-python inference.py
+python main.py --job=inference
 ```
+
+The pretrained model and finetuned model are saved in this repo. You can finetune without pretrainning, or inference without pretraining and finetuning.
 
 ## 📊 Expected Results
 
@@ -88,7 +96,7 @@ Overall Accuracy:      79.17%
 Original Classes (0-7): ~98.7% (maintained)
 New Classes (8-9):      ~95%+ (learned via LoRA)
 Overall Accuracy:       ~98%+
-LoRA Parameters:        <1% of total model parameters
+LoRA Parameters:        6.8% of total model parameters
 ```
 
 ## 🔬 Key Learning Objectives
@@ -98,27 +106,6 @@ LoRA Parameters:        <1% of total model parameters
 3. **Modular Adaptation**: LoRA modules can be added/removed without affecting base model
 4. **Low-Rank Decomposition**: Understand how matrix factorization enables efficient adaptation
 
-## 🧮 Implementation Details
-
-### LoRA Mathematics
-For a linear layer with weight matrix W ∈ ℝᵐˣⁿ:
-
-```
-Standard fine-tuning: W' = W + ΔW  (nm parameters to update)
-LoRA adaptation:     W' = W + AB    (r(m+n) parameters, r << min(m,n))
-
-Where:
-- A ∈ R^{m \times r} (initialized randomly)
-- B ∈ R^{r \times n} (initialized to zero)
-- r is the rank (typically 1-64)
-```
-
-### Parameter Efficiency Example
-```
-Base MLP total parameters: ~500K
-LoRA parameters (r=16):    ~5K (1% of base model)
-Full fine-tuning:          ~500K (100% of base model)
-```
 
 ## 🎓 Educational Value
 
@@ -134,7 +121,6 @@ This toy example helps understand:
 - PyTorch >= 2.8.0
 - torchvision >= 0.20.0
 - numpy >= 1.24.0
-- Pillow (for inference utilities)
 
 ### Hyperparameters
 - **Base Model**: 512→256→128 hidden layers, 0.2 dropout
@@ -155,4 +141,3 @@ This project is licensed under the terms specified in the LICENSE file.
 ---
 
 *This is a educational toy implementation. For production LoRA usage, consider libraries like [PEFT](https://github.com/huggingface/peft) or [LoRA implementations](https://github.com/microsoft/LoRA) from established ML frameworks.*
-
