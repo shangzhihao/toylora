@@ -4,42 +4,7 @@ import torch.optim as optim
 
 import config
 from data_util import get_pretrain_data_loaders
-
-
-class MLP(nn.Module):
-    """Multi-Layer Perceptron for MNIST classification"""
-
-    def __init__(
-        self,
-        input_size=784,
-        hidden_sizes=(512, 256, 128),
-        num_classes=10,
-        dropout_rate=0.2,
-    ):
-        super().__init__()
-
-        layers = []
-        prev_size = input_size
-
-        # Create hidden layers
-        for hidden_size in hidden_sizes:
-            layers.append(nn.Linear(prev_size, hidden_size))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(dropout_rate))
-            prev_size = hidden_size
-
-        # Output layer
-        layers.append(nn.Linear(prev_size, num_classes))
-
-        self.network = nn.Sequential(*layers)
-
-    def forward(self, x):
-        # Flatten the input (batch_size, 28, 28) -> (batch_size, 784)
-        x = x.view(x.size(0), -1)
-        return self.network(x)
-
-
-
+from models import MLP
 
 
 def train_model(model, train_loader, criterion, optimizer, device):
@@ -96,7 +61,7 @@ def pretrain():
     # Training loop
     print("\nStarting training...")
     for epoch in range(num_epochs):
-        print(f"Epoch {epoch+1}/{num_epochs}")
+        print(f"Epoch {epoch + 1}/{num_epochs}")
         train_model(model, train_loader, criterion, optimizer, device)
 
     # Save the model

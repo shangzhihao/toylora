@@ -2,8 +2,7 @@ import torch
 
 import config
 from data_util import get_inference_data_loader
-from finetune import LoRAMLP
-from pretrain import MLP
+from models import MLP, LoRAMLP
 
 
 def evaluate_model_accuracy(model, test_loader, device):
