@@ -76,11 +76,8 @@ This creates:
 
 ### Testing and Inference
 ```bash
-# TODO: Implement inference script
 python main.py --job=inference
 ```
-
-The pretrained model and finetuned model are saved in this repo. You can finetune without pretrainning, or inference without pretraining and finetuning.
 
 ## 📊 Expected Results
 
@@ -99,6 +96,8 @@ Overall Accuracy:       ~98%+
 LoRA Parameters:        6.8% of total model parameters
 ```
 
+> ⚠️ **WARNING**: Catastrophic forgetting is currently occurring in this implementation. The model may not achieve the expected results shown above. This issue is being actively resolved.
+
 ## 🔬 Key Learning Objectives
 
 1. **Parameter Efficiency**: See how LoRA achieves good performance with minimal additional parameters
@@ -115,20 +114,6 @@ This toy example helps understand:
 - **Task composition**: How base knowledge combines with new adaptations
 - **Practical implementation**: Concrete code example of LoRA concepts
 
-## 🛠️ Technical Implementation
-
-### Dependencies
-- PyTorch >= 2.8.0
-- torchvision >= 0.20.0
-- numpy >= 1.24.0
-
-### Hyperparameters
-- **Base Model**: 512→256→128 hidden layers, 0.2 dropout
-- **LoRA Rank**: r=16 (configurable)
-- **Learning Rate**: 0.001 (Adam optimizer)
-- **Training**: 10 epochs base + 5 epochs LoRA
-
-Other hyperparameters are in config.py.
 
 ## 📚 Further Reading
 
