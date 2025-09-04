@@ -7,7 +7,8 @@ jobs = {"pretrain", "finetune", "inference"}
 
 def main(job="pretrain"):
     if job not in jobs:
-        raise ValueError(f"Invalid job name: {job}. Valid options are: {jobs}")
+        job = "pretrain"
+        print(f"Invalid job '{job}'. Using 'pretrain' instead.")
     if job == "pretrain":
         print("Pretraining...")
         pretrain()
