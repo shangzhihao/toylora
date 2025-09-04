@@ -111,9 +111,9 @@ def finetune():
     
     # Load pretrained model
     pretrained_model = MLP(input_size=784, hidden_sizes=[512, 256, 128], num_classes=10)
-    pretrained_model.load_state_dict(torch.load('pretrained.pth', map_location=device))
+    pretrained_model.load_state_dict(torch.load(config.pre_model_path, map_location=device))
     pretrained_model.to(device)
-    print("Loaded pretrained model from 'pretrained.pth'")
+    print("Loaded pretrained model from {config.pre_model_path}")
     
     # Hyperparameters
     lora_rank = config.lora_rank
