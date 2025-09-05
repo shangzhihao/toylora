@@ -71,8 +71,8 @@ def finetune():
         train_07, _ = load_mnist_datasets(train_labels=list(range(8)))
 
         num_89 = len(train_89)
-        # Number of [0-7] samples to mix is 10% of [8,9]
-        num_mix = max(1, int(0.10 * num_89))
+        # Number of [0-7] samples to mix
+        num_mix = max(1, int(config.lora_digits_per* num_89))
         if num_mix > len(train_07):
             num_mix = len(train_07)
 

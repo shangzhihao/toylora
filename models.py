@@ -7,6 +7,7 @@ LoRA implementation, including the base MLP and LoRA-adapted versions.
 
 import torch
 import torch.nn as nn
+import config
 
 
 class MLP(nn.Module):
@@ -89,33 +90,44 @@ class LoRAMLP(nn.Module):
         for param in self.pretrained_model.parameters():
             param.requires_grad = False
 
-        # Replace Linear layers with LoRA versions
-        self.lora_layers = nn.ModuleList()
-
-        # Find and replace Linear layers in the sequential network
-        for _i, layer in enumerate(self.pretrained_model.network):
+        # Identify indices of Linear layers in the backbone
+        linear_indices = []
+        for i, layer in enumerate(self.pretrained_model.network):
             if isinstance(layer, nn.Linear):
+                linear_indices.append(i)
+
+        # Decide which Linear layers to adapt with LoRA
+        if config.lora_classifer_only and len(linear_indices) > 0:
+            self.apply_linear_indices = {linear_indices[-1]}
+        else:
+            self.apply_linear_indices = set(linear_indices)
+
+        # Create LoRA modules only for selected Linear layers
+        self.lora_layers = nn.ModuleList()
+        for i, layer in enumerate(self.pretrained_model.network):
+            if isinstance(layer, nn.Linear) and i in self.apply_linear_indices:
                 lora_layer = LoRALinear(layer, rank=rank, alpha=alpha)
                 self.lora_layers.append(lora_layer)
 
-        # Keep track of layer indices for reconstruction
-        self.linear_indices = []
-        for i, layer in enumerate(self.pretrained_model.network):
-            if isinstance(layer, nn.Linear):
-                self.linear_indices.append(i)
+        # Keep track of all Linear layer indices (for reference)
+        self.linear_indices = linear_indices
 
     def forward(self, x):
         # Flatten the input (batch_size, 28, 28) -> (batch_size, 784)
         x = x.view(x.size(0), -1)
 
         lora_idx = 0
-        for _i, layer in enumerate(self.pretrained_model.network):
+        for i, layer in enumerate(self.pretrained_model.network):
             if isinstance(layer, nn.Linear):
-                # Use LoRA adaptation
-                x = self.lora_layers[lora_idx](x)
-                lora_idx += 1
+                if i in self.apply_linear_indices:
+                    # Use LoRA adaptation for selected layers
+                    x = self.lora_layers[lora_idx](x)
+                    lora_idx += 1
+                else:
+                    # Pass through the original frozen Linear layer
+                    x = layer(x)
             else:
-                # Use original layer (ReLU, Dropout)
+                # Use original non-Linear layers (ReLU, Dropout)
                 x = layer(x)
 
         return x
