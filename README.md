@@ -77,6 +77,8 @@ This creates:
 ### Testing and Inference
 ```bash
 python main.py --job=inference
+or
+python inference.py
 ```
 
 ## 📊 Expected Results
@@ -97,22 +99,6 @@ LoRA Parameters:        6.8% of total model parameters
 ```
 
 > ⚠️ **WARNING**: Catastrophic forgetting is currently occurring in this implementation. The model may not achieve the expected results shown above. This issue is being actively resolved.
-
-## 🔬 Key Learning Objectives
-
-1. **Parameter Efficiency**: See how LoRA achieves good performance with minimal additional parameters
-2. **Weight Preservation**: Original model knowledge (digits 0-7) remains intact
-3. **Modular Adaptation**: LoRA modules can be added/removed without affecting base model
-4. **Low-Rank Decomposition**: Understand how matrix factorization enables efficient adaptation
-
-
-## 🎓 Educational Value
-
-This toy example helps understand:
-- **Why LoRA works**: Low-rank hypothesis in neural network adaptations
-- **Parameter efficiency**: Dramatic reduction in trainable parameters
-- **Task composition**: How base knowledge combines with new adaptations
-- **Practical implementation**: Concrete code example of LoRA concepts
 
 
 ## 📚 Further Reading
