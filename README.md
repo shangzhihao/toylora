@@ -1,6 +1,6 @@
 # ToyLoRA: Understanding Low-Rank Adaptation through MNIST
 
-A toy implementation demonstrating how **LoRA (Low-Rank Adaptation)** works in practice. This project shows the core concepts of LoRA by:
+A toy implementation demonstrating how **LoRA (Low-Rank Adaptation)** works. This project shows the core concepts of LoRA by:
 
 1. **Base Training**: Training an MLP on MNIST digits 0-7
 2. **LoRA Fine-tuning**: Using low-rank adaptation to efficiently learn digits 8-9 without modifying the original model weights
@@ -110,7 +110,3 @@ LoRA Parameters:        6.8% of total model parameters
 ## 📄 License
 
 This project is licensed under the terms specified in the LICENSE file.
-
----
-
-*This is a educational toy implementation. For production LoRA usage, consider libraries like [PEFT](https://github.com/huggingface/peft) or [LoRA implementations](https://github.com/microsoft/LoRA) from established ML frameworks.*

@@ -3,7 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 import config
-from data_util import get_finetune_data_loaders
+from torch.utils.data import ConcatDataset, Subset, DataLoader
+from data_util import get_finetune_data_loaders, load_mnist_datasets
 from models import MLP, LoRAMLP
 
 
@@ -61,6 +62,34 @@ def finetune():
     # Load data for fine-tuning (digits 8-9)
     print("\nLoading MNIST dataset for fine-tuning...")
     finetune_loader, test_loader = get_finetune_data_loaders(batch_size)
+
+    # Optionally mix in 10% of digits [0-7] relative to [8,9]
+    if getattr(config, "lora_mix_old_digits", False):
+        print("\nMixing 10% of digits [0-7] into the fine-tuning set...")
+        # Load filtered training datasets
+        train_89, _ = load_mnist_datasets(train_labels=[8, 9])
+        train_07, _ = load_mnist_datasets(train_labels=list(range(8)))
+
+        num_89 = len(train_89)
+        # Number of [0-7] samples to mix is 10% of [8,9]
+        num_mix = max(1, int(0.10 * num_89))
+        if num_mix > len(train_07):
+            num_mix = len(train_07)
+
+        # Randomly sample indices from the [0-7] dataset
+        import random
+
+        sampled_indices = random.sample(range(len(train_07)), num_mix)
+        subset_07 = Subset(train_07, sampled_indices)
+
+        # Combine datasets and recreate the training loader
+        combined_train = ConcatDataset([train_89, subset_07])
+        finetune_loader = DataLoader(combined_train, batch_size=batch_size, shuffle=True)
+
+        print(
+            f"Fine-tuning samples [8,9]: {num_89}, mixed [0-7]: {len(subset_07)} (10%)"
+        )
+        print(f"Total fine-tuning samples: {len(combined_train)}")
 
     # Loss function and optimizer (only LoRA parameters)
     criterion = nn.CrossEntropyLoss()
