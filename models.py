@@ -7,6 +7,7 @@ LoRA implementation, including the base MLP and LoRA-adapted versions.
 
 import torch
 import torch.nn as nn
+
 import config
 
 
@@ -86,31 +87,33 @@ class LoRAMLP(nn.Module):
         super().__init__()
         self.pretrained_model = pretrained_model
 
-        # Freeze all pretrained parameters
+        self._freeze_backbone()
+        self.linear_indices = self._collect_linear_indices()
+        self.apply_linear_indices = self._select_target_layers()
+        self.lora_layers = self._build_lora_layers(rank, alpha)
+
+    def _freeze_backbone(self):
         for param in self.pretrained_model.parameters():
             param.requires_grad = False
 
-        # Identify indices of Linear layers in the backbone
-        linear_indices = []
-        for i, layer in enumerate(self.pretrained_model.network):
-            if isinstance(layer, nn.Linear):
-                linear_indices.append(i)
+    def _collect_linear_indices(self):
+        return [
+            i
+            for i, layer in enumerate(self.pretrained_model.network)
+            if isinstance(layer, nn.Linear)
+        ]
 
-        # Decide which Linear layers to adapt with LoRA
-        if config.lora_classifer_only and len(linear_indices) > 0:
-            self.apply_linear_indices = {linear_indices[-1]}
-        else:
-            self.apply_linear_indices = set(linear_indices)
+    def _select_target_layers(self):
+        if config.lora_classifer_only and self.linear_indices:
+            return {self.linear_indices[-1]}
+        return set(self.linear_indices)
 
-        # Create LoRA modules only for selected Linear layers
-        self.lora_layers = nn.ModuleList()
+    def _build_lora_layers(self, rank, alpha):
+        layers = []
         for i, layer in enumerate(self.pretrained_model.network):
             if isinstance(layer, nn.Linear) and i in self.apply_linear_indices:
-                lora_layer = LoRALinear(layer, rank=rank, alpha=alpha)
-                self.lora_layers.append(lora_layer)
-
-        # Keep track of all Linear layer indices (for reference)
-        self.linear_indices = linear_indices
+                layers.append(LoRALinear(layer, rank=rank, alpha=alpha))
+        return nn.ModuleList(layers)
 
     def forward(self, x):
         # Flatten the input (batch_size, 28, 28) -> (batch_size, 784)

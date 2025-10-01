@@ -1,3 +1,5 @@
+# ruff: noqa: S101  # pytest-style assertions are intentional in tests
+
 import torch
 import torch.nn as nn
 
